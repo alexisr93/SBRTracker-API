@@ -30,6 +30,7 @@ class Incident(db.Model):
   previous_intervention = db.Column(db.String(50))
   incident_description = db.Column(db.String(200))
   status = db.Column(db.String(10))
+  resolution = db.Column(db.String(1000))
 
   def __init__(self,
                first_name,
@@ -41,7 +42,8 @@ class Incident(db.Model):
                incident_type,
                previous_intervention,
                incident_description,
-               status):
+               status,
+               resolution):
 
     self.first_name = first_name
     self.middle_name = middle_name
@@ -53,6 +55,7 @@ class Incident(db.Model):
     self.previous_intervention = previous_intervention
     self.incident_description = incident_description
     self.status = status
+    self.resolution = resolution
 
 # Incident Schema
 class IncidentSchema(ma.Schema):
@@ -67,7 +70,8 @@ class IncidentSchema(ma.Schema):
               'incident_type',
               'previous_intervention',
               'incident_description',
-              'status')
+              'status',
+              'resolution')
 
 # Initialize schema
 incident_schema = IncidentSchema()
@@ -86,6 +90,7 @@ def add_incident():
   previous_intervention = request.json['previous_intervention']
   incident_description = request.json['incident_description']
   status = request.json['status']
+  resolution = request.json['resolution']
 
   new_incident = Incident(first_name,
                           middle_name,
@@ -96,7 +101,8 @@ def add_incident():
                           incident_type,
                           previous_intervention,
                           incident_description,
-                          status)
+                          status,
+                          resolution)
 
   db.session.add(new_incident)
   db.session.commit()
@@ -131,6 +137,7 @@ def update_incident(id):
   previous_intervention = request.json['previous_intervention']
   incident_description = request.json['incident_description']
   status = request.json['status']
+  resolution = request.json['resolution']
 
   incident.first_name = first_name
   incident.middle_name = middle_name
@@ -142,6 +149,7 @@ def update_incident(id):
   incident.previous_intervention = previous_intervention
   incident.incident_description = incident_description
   incident.status = status
+  incident.resolution = resolution
 
   db.session.commit()
 
