@@ -1,10 +1,12 @@
 from flask import Flask, request, jsonify
+from flask_cors import CORS
 from flask_sqlalchemy import SQLAlchemy
 from flask_marshmallow import Marshmallow
 import os
 
 # Initialize app
 app = Flask(__name__)
+CORS(app)
 basedir = os.path.abspath(os.path.dirname(__file__))
 
 # Database
@@ -114,7 +116,7 @@ def add_incident():
 def get_incidents():
   all_incident = Incident.query.all()
   result = incidents_schema.dump(all_incident)
-  return jsonify(result.data)
+  return jsonify(result)
 
 # Get single Incident
 @app.route('/incident/<id>', methods=['GET'])
