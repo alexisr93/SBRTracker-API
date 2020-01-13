@@ -2,6 +2,7 @@ from flask import Flask, request, jsonify
 from flask_cors import CORS
 from flask_sqlalchemy import SQLAlchemy
 from flask_marshmallow import Marshmallow
+from datetime import date
 import os
 
 # Initialize app
@@ -33,6 +34,7 @@ class Incident(db.Model):
   incident_description = db.Column(db.String(200))
   status = db.Column(db.String(10))
   resolution = db.Column(db.String(1000))
+  date_resolved = db.Column(db.String(10))
 
   def __init__(self,
                first_name,
@@ -45,7 +47,8 @@ class Incident(db.Model):
                previous_intervention,
                incident_description,
                status,
-               resolution):
+               resolution,
+               date_resolved):
 
     self.first_name = first_name
     self.middle_name = middle_name
@@ -58,6 +61,7 @@ class Incident(db.Model):
     self.incident_description = incident_description
     self.status = status
     self.resolution = resolution
+    self.date_resolved = date_resolved
 
 # Incident Schema
 class IncidentSchema(ma.Schema):
@@ -73,14 +77,15 @@ class IncidentSchema(ma.Schema):
               'previous_intervention',
               'incident_description',
               'status',
-              'resolution')
+              'resolution',
+              "date_resolved")
 
 # Initialize schema
 incident_schema = IncidentSchema()
 incidents_schema = IncidentSchema(many=True)
 
 # Create Incident
-@app.route('/incident', methods=['POST'])
+@app.route('/incidents', methods=['POST'])
 def add_incident():
   first_name = request.json['first_name']
   middle_name = request.json['middle_name']
@@ -91,8 +96,9 @@ def add_incident():
   incident_type = request.json['incident_type']
   previous_intervention = request.json['previous_intervention']
   incident_description = request.json['incident_description']
-  status = request.json['status']
+  status = "Pending"
   resolution = request.json['resolution']
+  date_resolved = ""
 
   new_incident = Incident(first_name,
                           middle_name,
@@ -104,7 +110,8 @@ def add_incident():
                           previous_intervention,
                           incident_description,
                           status,
-                          resolution)
+                          resolution,
+                          date_resolved)
 
   db.session.add(new_incident)
   db.session.commit()
@@ -112,20 +119,20 @@ def add_incident():
   return incident_schema.jsonify(new_incident)
 
 # Get all Incidents
-@app.route('/incident', methods=['GET'])
+@app.route('/incidents', methods=['GET'])
 def get_incidents():
   all_incident = Incident.query.all()
   result = incidents_schema.dump(all_incident)
   return jsonify(result)
 
 # Get single Incident
-@app.route('/incident/<id>', methods=['GET'])
+@app.route('/incidents/<id>', methods=['GET'])
 def get_incident(id):
   incident = Incident.query.get(id)
   return incident_schema.jsonify(incident)
 
 # Update Incident
-@app.route('/incident/<id>', methods=['PUT'])
+@app.route('/incidents/<id>', methods=['PUT'])
 def update_incident(id):
   incident = Incident.query.get(id)
 
@@ -140,6 +147,7 @@ def update_incident(id):
   incident_description = request.json['incident_description']
   status = request.json['status']
   resolution = request.json['resolution']
+  date_resolved = date.today().strftime("%m/%d/%y")
 
   incident.first_name = first_name
   incident.middle_name = middle_name
@@ -152,13 +160,14 @@ def update_incident(id):
   incident.incident_description = incident_description
   incident.status = status
   incident.resolution = resolution
+  incident.date_resolved = date_resolved
 
   db.session.commit()
 
   return incident_schema.jsonify(incident)
 
 # Delete Incident
-@app.route('/incident/<id>', methods=['DELETE'])
+@app.route('/incidents/<id>', methods=['DELETE'])
 def delete_incident(id):
   incident = Incident.query.get(id)
   db.session.delete(incident)
